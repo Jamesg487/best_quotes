@@ -10,9 +10,30 @@ class QuotesController < Rulers::Controller
     "quote" => "A picture is worth one k pixels",
     "attribution" => "Me"
     }
-    
+
     m = FileModel.create attrs
     render :quote, :obj => m
+  end
+
+  def update
+    raise "must be post request" unless env["REQUEST_METHOD"] == "POST"
+
+    request = Rack::Request.new(env)
+    params = request.params
+
+    quote = FileModel.find(params["id"])
+
+    quote[params["attribute_to_update"]] = params["attribute_value"]
+
+    File.open("db/quotes/#{params["id"]}.json", "w") do |f|
+      f.write <<-TEMPLATE
+        {
+        "submitter": "#{quote["submitter"]}",
+        "quote": "#{quote["quote"]}",
+        "attribution": "#{quote["attribution"]}"
+        }
+      TEMPLATE
+    end
   end
 
   def a_quote
@@ -20,7 +41,7 @@ class QuotesController < Rulers::Controller
   end
 
   def quote_1
-    quote_1 = Rulers::Model::FileModel.find(1)
+    quote_1 = FileModel.find(1)
     render :quote, :obj => quote_1
   end
 
