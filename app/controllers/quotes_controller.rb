@@ -4,6 +4,12 @@ class QuotesController < Rulers::Controller
     render :index, :quotes => quotes
   end
 
+  def show
+    quote = FileModel.find(params["id"])
+    ua = request.user_agent
+    render_response :obj => quote, :ua => ua
+  end
+
   def new_quote
     attrs = {
     "submitter" => "web user",
@@ -17,9 +23,6 @@ class QuotesController < Rulers::Controller
 
   def update
     raise "must be post request" unless env["REQUEST_METHOD"] == "POST"
-
-    request = Rack::Request.new(env)
-    params = request.params
 
     quote = FileModel.find(params["id"])
 
